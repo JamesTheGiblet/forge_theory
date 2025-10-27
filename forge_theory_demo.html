@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forge Theory - The Emergence Demo</title>
+    <style>
+        :root {
+            --grid-size: 50;
+            --cell-size: 12px;
+            --bg-color: #0a0a0f;
+            --surface-color: #1a1a2e;
+            --cell-dead-color: #2a2a3e;
+            --cell-alive-color: #00f2ea;
+            --cell-dying-color: #ff6b9d;
+            --glow-color: rgba(0, 242, 234, 0.6);
+            --text-color: #e8e8f0;
+            --text-muted: #8888a8;
+            --button-bg: #6f2232;
+            --button-hover-bg: #952d43;
+            --accent-color: #00f2ea;
+            --border-color: #3a3a5e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #16162e 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 900px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        h1 .forge {
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 20px var(--glow-color);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .philosophy {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            max-width: 800px;
+        }
+
+        .philosophy h3 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .philosophy p {
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .rules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .rule {
+            background: rgba(0, 242, 234, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .rule strong {
+            color: var(--accent-color);
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1400px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .grid-section {
+            flex: 1;
+            min-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .controls {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            transition: all 0.2s ease;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #00f2ea 0%, #00b8d4 100%);
+            color: var(--bg-color);
+            font-weight: 600;
+        }
+
+        button.primary:hover {
+            background: linear-gradient(135deg, #00d4cc 0%, #00a0bd 100%);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .speed-control input {
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .speed-label {
+            margin-right: 8px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--cell-dead-color);
+            outline: none;
+            border-radius: 10px;
+            height: 6px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-color);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--glow-color);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--accent-color);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--glow-color);
+            border: none;
+        }
+
+        .stats {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-size), var(--cell-size));
+            grid-template-rows: repeat(var(--grid-size), var(--cell-size));
+            border: 2px solid var(--border-color);
+            background: var(--cell-dead-color);
+            border-radius: 5px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            cursor: crosshair;
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background-color: var(--cell-dead-color);
+            transition: all 0.15s ease;
+        }
+
+        .cell.alive {
+            background-color: var(--cell-alive-color) !important; /* Override heatmap for new cells */
+            box-shadow: 0 0 8px var(--glow-color);
+        }
+
+        .cell.dying {
+            background-color: var(--cell-dying-color);
+        }
+
+        .graph-container {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            max-width: 650px;
+        }
+        .sidebar {
+            flex: 0 0 300px;
+            min-width: 300px;
+        }
+
+        .patterns {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .patterns h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .pattern-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pattern-btn {
+            padding: 10px;
+            background: rgba(0, 242, 234, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .pattern-btn:hover {
+            background: rgba(0, 242, 234, 0.2);
+            border-color: var(--accent-color);
+            transform: translateX(5px);
+        }
+
+        .pattern-name {
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 3px;
+        }
+
+        .pattern-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-box {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .info-box h3 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-box li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .info-box li:last-child {
+            border-bottom: none;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1200px) {
+            .sidebar {
+                flex: 1;
+                min-width: 100%;
+            }
+
+            .grid-section {
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            :root {
+                --grid-size: 40;
+                --cell-size: 10px;
+            }
+
+            .controls {
+                padding: 15px;
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><span class="forge">FORGE THEORY</span> Emergence Demo</h1>
+        <p class="subtitle">"Complex, sophisticated behavior emerges from elegantly simple underlying rules."</p>
+        
+        <div class="philosophy">
+            <h3>Conway's Game of Life: The Perfect Emergence Example</h3>
+            <p>Watch as four simple rules create infinite complexity. Click cells to draw patterns, or choose from the pattern library. Press Start and observe emergence in action.</p>
+            
+            <div class="rules">
+                <div class="rule">
+                    <strong>Birth:</strong> Dead cell with exactly 3 neighbors comes alive
+                </div>
+                <div class="rule">
+                    <strong>Survival:</strong> Live cell with 2-3 neighbors survives
+                </div>
+                <div class="rule">
+                    <strong>Loneliness:</strong> Live cell with &lt;2 neighbors dies
+                </div>
+                <div class="rule">
+                    <strong>Overcrowding:</strong> Live cell with &gt;3 neighbors dies
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="grid-section">
+            <div class="controls">
+                <div class="control-row"> 
+                    <button id="start-stop-btn" class="primary">▶ Start</button>
+                    <button id="step-btn">Step Forward</button>
+                    <button id="clear-btn">Clear Grid</button>
+                    <button id="save-btn">Save State</button>
+                    <button id="heatmap-btn">Heatmap: Off</button>
+                    <button id="load-btn">Load State</button>
+                </div>
+                <div class="control-row speed-control">
+                    <button id="random-btn">Random Seed</button>
+                    <button id="invert-btn">Invert Colors</button>
+                    <label for="speed-slider" class="speed-label">Speed:</label>
+                    <input type="range" id="speed-slider" min="10" max="500" value="100" step="10" title="Adjust simulation speed">
+                    <span id="speed-value">100ms</span>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">🔄 Generation</div>
+                    <div class="stat-value" id="generation">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">🧬 Population</div>
+                    <div class="stat-value" id="population">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">✨ Births</div>
+                    <div class="stat-value" id="births">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">💀 Deaths</div>
+                    <div class="stat-value" id="deaths">0</div>
+                </div>
+            </div>
+
+            <div id="grid-container"></div>
+
+            <div class="graph-container" style="margin-top: 20px;">
+                <h3 style="text-align: center; color: var(--accent-color); margin-bottom: 15px;">Population History</h3>
+                <canvas id="population-graph" width="610" height="100"></canvas>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="patterns">
+                <h3>📚 Pattern Library</h3>
+                <div class="pattern-list">
+                    <div class="pattern-btn" data-pattern="glider">
+                        <div class="pattern-name">Glider</div>
+                        <div class="pattern-desc">Classic spaceship - travels diagonally</div>
+                    </div>
+                    <div class="pattern-btn" data-pattern="lwss">
+                        <div class="pattern-name">Lightweight Spaceship</div>
+                        <div class="pattern-desc">Moves horizontally across the grid</div>
+                    </div>
+                    <div class="pattern-btn" data-pattern="glider-gun">
+                        <div class="pattern-name">Gosper Glider Gun</div>
+                        <div class="pattern-desc">Produces infinite gliders</div>
+                    </div>
+                    <div class="pattern-btn" data-pattern="pulsar">
+                        <div class="pattern-name">Pulsar</div>
+                        <div class="pattern-desc">Period-3 oscillator, symmetric beauty</div>
+                    </div>
+                    <div class="pattern-btn" data-pattern="pentadecathlon">
+                        <div class="pattern-name">Pentadecathlon</div>
+                        <div class="pattern-desc">Period-15 oscillator</div>
+                    </div>
+                    <div class="pattern-btn" data-pattern="acorn">
+                        <div class="pattern-name">Acorn</div>
+                        <div class="pattern-desc">Takes 5206 generations to stabilize</div>
+                    </div>
+                    <div class="pattern-btn" data-pattern="rpentomino">
+                        <div class="pattern-name">R-pentomino</div>
+                        <div class="pattern-desc">Methuselah - runs for 1103 generations</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>🌌 Emergence Principles</h3>
+                <ul>
+                    <li><strong>Simple Rules:</strong> Just 4 deterministic rules govern every cell</li>
+                    <li><strong>Local Interactions:</strong> Each cell only checks its 8 neighbors</li>
+                    <li><strong>No Central Control:</strong> No orchestrator, no blueprint</li>
+                    <li><strong>Complex Patterns:</strong> Gliders, guns, puffers, spaceships emerge</li>
+                    <li><strong>Universal Computation:</strong> This system is Turing-complete</li>
+                    <li><strong>Unpredictability:</strong> Long-term behavior requires simulation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>Part of The Forge Collection</strong> — Simple rules. Deep time. Emergent complexity.</p>
+        <p>Explore more: <a href="#">TreeForge</a> • <a href="#">EcoForge</a> • <a href="#">NeuroForge</a> • <a href="#">LinguaForge</a> • <a href="#">QuantAlgo</a></p>
+    </footer>
+
+    <script>
+        class GameOfLife {
+            constructor(size) {
+                this.size = size;
+                this.cells = this.createEmptyGrid();
+                this.generation = 0;
+                this.stepTimeoutId = null;
+                this.isRunning = false;
+                this.intervalId = null;
+                this.speed = 100;
+                this.birthsThisGen = 0;
+                this.deathsThisGen = 0;
+                this.isDragging = false;
+                this.heatmapEnabled = false;
+                this.dragMode = null; // 'alive' or 'dead'
+                this.populationHistory = [];
+            }
+
+            createEmptyGrid() {
+                return Array(this.size).fill(null).map(() => Array(this.size).fill(null).map(() => ({ alive: false, element: null, age: 0 })));
+            }
+
+            countLiveNeighbors(row, col) {
+                let count = 0;
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        if (i === 0 && j === 0) continue;
+                        const x = (row + i + this.size) % this.size; // Wrap around edges
+                        const y = (col + j + this.size) % this.size;
+                        if (this.cells[x][y].alive) count++;
+                    }
+                }
+                return count;
+            }
+
+            step() {
+                const nextGen = this.createEmptyGrid();
+                this.birthsThisGen = 0;
+                this.deathsThisGen = 0;
+
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        const neighbors = this.countLiveNeighbors(i, j);
+                        const cell = this.cells[i][j];
+                        nextGen[i][j].element = cell.element;
+
+                        if (cell.alive) {
+                            // Survival or death
+                            if (neighbors === 2 || neighbors === 3) {
+                                nextGen[i][j].alive = true;
+                                nextGen[i][j].age = cell.age + 1;
+                                cell.element.classList.remove('dying');
+                            } else {
+                                nextGen[i][j].alive = false;
+                                nextGen[i][j].age = 0;
+                                this.deathsThisGen++;
+                            }
+                        } else {
+                            // Birth
+                            if (neighbors === 3) {
+                                nextGen[i][j].alive = true;
+                                nextGen[i][j].age = 1;
+                                cell.element.classList.remove('dying');
+                                this.birthsThisGen++;
+                            }
+                        }
+                    }
+                }
+
+                this.applyNextGenState(nextGen);
+
+                // Use a timeout to allow the 'dying' animation to be seen
+                this.stepTimeoutId = setTimeout(() => {
+                    this.cells = nextGen;
+                    this.generation++;
+                    this.draw();
+                    this.updateStats();
+                    this.stepTimeoutId = null;
+                }, 50);
+            }
+
+            toggleCell(row, col, forceState = null) {
+                if (forceState !== null) {
+                    if (this.cells[row][col].alive !== forceState) {
+                        this.cells[row][col].alive = forceState;
+                        this.cells[row][col].age = forceState ? 1 : 0;
+                    }
+                } else {
+                    this.cells[row][col].alive = !this.cells[row][col].alive;
+                    this.cells[row][col].age = this.cells[row][col].alive ? 1 : 0;
+                }
+                this.drawCell(row, col);
+                this.updateStats();
+            }
+
+            getHeatmapColor(age) {
+                if (age === 0) return '';
+                // Hue: 178 (teal) -> 60 (yellow) -> 0 (red)
+                const hue = Math.max(0, 178 - age * 2);
+                // Saturation: 100% -> 100%
+                const saturation = 100;
+                // Lightness: 47% -> 50%
+                const lightness = Math.min(50, 47 + age * 0.1);
+                return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            }
+
+            drawCell(row, col) {
+                const cell = this.cells[row][col];
+                const isDying = cell.element.classList.contains('dying');
+
+                if (cell.alive) {
+                    cell.element.classList.add('alive');
+                    cell.element.classList.remove('dying');
+                    if (this.heatmapEnabled) {
+                        cell.element.style.backgroundColor = this.getHeatmapColor(cell.age);
+                    }
+                } else if (!isDying) { // Only remove 'alive' if not in the 'dying' state
+                    cell.element.classList.remove('alive');
+                    cell.element.style.backgroundColor = ''; // Reset to CSS default
+                }
+            }
+
+            draw() {
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        this.drawCell(i, j);
+                    }
+                }
+            }
+
+            applyNextGenState(nextGen) {
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        if (this.cells[i][j].alive && !nextGen[i][j].alive) {
+                            this.cells[i][j].element.classList.add('dying');
+                        }
+                    }
+                }
+            }
+
+            clear() {
+                this.stop();
+                this.cells = this.createEmptyGrid();
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        this.cells[i][j].element = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                    }
+                }
+                this.generation = 0;
+                this.birthsThisGen = 0;
+                this.deathsThisGen = 0;
+                this.draw();
+                this.updateStats();
+            }
+
+            randomize(density = 0.3) {
+                this.stop();
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        this.cells[i][j].alive = Math.random() < density;
+                        this.cells[i][j].age = this.cells[i][j].alive ? 1 : 0;
+                    }
+                }
+                this.draw();
+                this.updateStats();
+            }
+
+            invert() {
+                this.stop();
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        this.cells[i][j].alive = !this.cells[i][j].alive;
+                        this.cells[i][j].age = this.cells[i][j].alive ? 1 : 0;
+                    }
+                }
+                this.draw();
+                this.updateStats();
+            }
+
+            getLiveCount() {
+                let count = 0;
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        if (this.cells[i][j].alive) count++;
+                    }
+                }
+                return count;
+            }
+
+            updateStats() {
+                const liveCount = this.getLiveCount();
+                document.getElementById('generation').textContent = this.generation;
+                document.getElementById('population').textContent = liveCount;
+                document.getElementById('births').textContent = this.birthsThisGen;
+                document.getElementById('deaths').textContent = this.deathsThisGen;
+
+                // Update population history
+                this.populationHistory.push(liveCount);
+                if (this.populationHistory.length > 200) {
+                    this.populationHistory.shift();
+                }
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.intervalId = setInterval(() => { this.step(); graph.draw(this.populationHistory, this.size * this.size); }, this.speed);
+                document.getElementById('start-stop-btn').innerHTML = '⏸ Pause';
+            }
+
+            stop() {
+                if (!this.isRunning) return;
+                this.isRunning = false;
+                clearInterval(this.intervalId);
+                if (this.stepTimeoutId) {
+                    clearTimeout(this.stepTimeoutId);
+                    this.stepTimeoutId = null;
+                }
+                document.getElementById('start-stop-btn').innerHTML = '▶ Start';
+            }
+
+            setSpeed(ms) {
+                this.speed = ms;
+                if (this.isRunning) {
+                    this.stop();
+                    this.start();
+                }
+            }
+
+            loadPattern(pattern, startRow, startCol) {
+                pattern.forEach((row, i) => {
+                    row.forEach((cell, j) => {
+                        const r = (startRow + i) % this.size;
+                        const c = (startCol + j) % this.size;
+                        this.cells[r][c].alive = cell === 1;
+                        this.cells[r][c].age = cell === 1 ? 1 : 0;
+                    });
+                });
+                this.draw();
+                this.updateStats();
+            }
+
+            saveState() {
+                const serializableGrid = this.cells.map(row => 
+                    row.map(cell => cell.alive ? 1 : 0)
+                );
+                const state = {
+                    grid: serializableGrid,
+                    generation: this.generation
+                };
+                localStorage.setItem('gof-save-state', JSON.stringify(state));
+                console.log('Game state saved.');
+                document.getElementById('load-btn').disabled = false;
+            }
+
+            loadState() {
+                this.stop();
+                const savedStateJSON = localStorage.getItem('gof-save-state');
+                if (!savedStateJSON) {
+                    console.log('No saved state found.');
+                    return false;
+                }
+                const savedState = JSON.parse(savedStateJSON);
+                savedState.grid.forEach((row, i) => {
+                    row.forEach((cellState, j) => {
+                        this.cells[i][j].alive = cellState === 1;
+                        this.cells[i][j].age = cellState === 1 ? 1 : 0; // Reset age on load
+                    });
+                });
+                this.generation = savedState.generation || 0;
+                this.draw();
+                this.updateStats();
+                console.log('Game state loaded.');
+                return true;
+            }
+        }
+
+        class PopulationGraph {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.width = this.canvas.width;
+                this.height = this.canvas.height;
+            }
+
+            draw(history, maxPopulation) {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                if (history.length < 2) return;
+
+                const maxHistVal = Math.max(...history, 1);
+                const stepX = this.width / (history.length - 1);
+
+                // Gradient for the line
+                const gradient = this.ctx.createLinearGradient(0, 0, this.width, 0);
+                gradient.addColorStop(0, '#6f2232'); // Start color
+                gradient.addColorStop(0.5, '#00f2ea'); // Mid color (accent)
+                gradient.addColorStop(1, '#ff6b9d'); // End color
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.height - (history[0] / maxHistVal) * this.height);
+
+                for (let i = 1; i < history.length; i++) {
+                    const x = i * stepX;
+                    const y = this.height - (history[i] / maxHistVal) * this.height;
+                    this.ctx.lineTo(x, y);
+                }
+
+                this.ctx.strokeStyle = gradient;
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+
+                // Draw filled area below line
+                this.ctx.lineTo(this.width, this.height);
+                this.ctx.lineTo(0, this.height);
+                this.ctx.closePath();
+                
+                const fillGradient = this.ctx.createLinearGradient(0, 0, 0, this.height);
+                fillGradient.addColorStop(0, 'rgba(0, 242, 234, 0.2)');
+                fillGradient.addColorStop(1, 'rgba(0, 242, 234, 0)');
+                this.ctx.fillStyle = fillGradient;
+                this.ctx.fill();
+            }
+        }
+        // Pattern definitions
+        const patterns = {
+            glider: [
+                [0, 1, 0],
+                [0, 0, 1],
+                [1, 1, 1]
+            ],
+            lwss: [
+                [0, 1, 0, 0, 1],
+                [1, 0, 0, 0, 0],
+                [1, 0, 0, 0, 1],
+                [1, 1, 1, 1, 0]
+            ],
+            'glider-gun': [
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            pulsar: [
+                [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,1,1,1,0,0,0,1,1,1,0,0]
+            ],
+            pentadecathlon: [
+                [0,0,1,0,0,0,0,1,0,0],
+                [1,1,0,1,1,1,1,0,1,1],
+                [0,0,1,0,0,0,0,1,0,0]
+            ],
+            acorn: [
+                [0,1,0,0,0,0,0],
+                [0,0,0,1,0,0,0],
+                [1,1,0,0,1,1,1]
+            ],
+            rpentomino: [
+                [0,1,1],
+                [1,1,0],
+                [0,1,0]
+            ]
+        };
+
+        // Initialize
+        const GRID_SIZE = 50;
+        const game = new GameOfLife(GRID_SIZE);
+        const graph = new PopulationGraph('population-graph');
+        const gridContainer = document.getElementById('grid-container');
+
+        // Create grid
+        for (let i = 0; i < GRID_SIZE; i++) {
+            for (let j = 0; j < GRID_SIZE; j++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.row = i;
+                cell.dataset.col = j;
+                
+                // Mouse events for drawing
+                cell.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    game.isDragging = true;
+                    game.dragMode = game.cells[i][j].alive ? false : true;
+                    game.toggleCell(i, j, game.dragMode);
+                });
+                
+                cell.addEventListener('mouseenter', () => {
+                    if (game.isDragging) {
+                        game.toggleCell(i, j, game.dragMode);
+                    }
+                });
+                
+                gridContainer.appendChild(cell);
+                game.cells[i][j].element = cell;
+            }
+        }
+
+        // Global mouse up to stop dragging
+        document.addEventListener('mouseup', () => {
+            game.isDragging = false;
+        });
+
+        // Controls
+        document.getElementById('start-stop-btn').addEventListener('click', () => {
+            if (game.isRunning) {
+                game.stop();
+            } else { 
+                game.start();
+            }
+        });
+
+        document.getElementById('step-btn').addEventListener('click', () => {
+            if (!game.isRunning) {
+                game.step();
+                graph.draw(game.populationHistory, GRID_SIZE * GRID_SIZE);
+            }
+        });
+
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            game.clear();
+        });
+
+        document.getElementById('save-btn').addEventListener('click', () => {
+            game.saveState();
+        });
+
+        document.getElementById('load-btn').addEventListener('click', () => {
+            game.loadState();
+        });
+
+        document.getElementById('random-btn').addEventListener('click', () => {
+            game.randomize(0.25);
+        });
+
+        document.getElementById('invert-btn').addEventListener('click', () => {
+            game.invert();
+        });
+
+        document.getElementById('heatmap-btn').addEventListener('click', (e) => {
+            game.heatmapEnabled = !game.heatmapEnabled;
+            e.target.textContent = `Heatmap: ${game.heatmapEnabled ? 'On' : 'Off'}`;
+            e.target.classList.toggle('primary', game.heatmapEnabled);
+            game.draw();
+        });
+
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        
+        speedSlider.addEventListener('input', (e) => {
+            const speed = parseInt(e.target.value);
+            speedValue.textContent = (510 - speed) + 'ms';
+            game.setSpeed(speed);
+        });
+
+        // Pattern buttons
+        document.querySelectorAll('.pattern-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const patternName = btn.dataset.pattern;
+                const pattern = patterns[patternName];
+                if (pattern) {
+                    const startRow = Math.floor((GRID_SIZE - pattern.length) / 2);
+                    const startCol = Math.floor((GRID_SIZE - pattern[0].length) / 2);
+                    game.clear();
+                    game.loadPattern(pattern, startRow, startCol);
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (game.isRunning) {
+                    game.stop();
+                } else {
+                    game.start();
+                }
+            } else if (e.code === 'KeyS') {
+                game.step();
+            } else if (e.code === 'KeyC') {
+                document.getElementById('clear-btn').click();
+            } else if (e.code === 'KeyR') {
+                game.randomize(0.25);
+            }
+        });
+
+        // Initial draw
+        game.draw();
+        game.updateStats();
+        graph.draw(game.populationHistory, GRID_SIZE * GRID_SIZE);
+
+        // Disable load button if no save exists
+        if (!localStorage.getItem('gof-save-state')) {
+            document.getElementById('load-btn').disabled = true;
+        }
+    </script>
+</body>
+</html>

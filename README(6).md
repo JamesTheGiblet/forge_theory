@@ -1,5 +1,4 @@
 ⚡ FORGE THEORY ⚡
-
 ═══════════════════════════════════════════════════════════════════════════════
 
     ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
@@ -66,31 +65,6 @@ This isn't a metaphor. It's the fundamental algorithm of reality:
 - 🌍 **Civilizations** emerge from individual decisions
 
 **Every Forge demonstrates this principle in a different domain.**
-
----
-
-### About This Project
-
-Forge Theory explores how intelligence emerges from simple
-components following local rules.
-
-This framework was itself created through emergence: human
-intuition and AI synthesis collaborating to produce insights
-neither could generate alone.
-
-**We are the evidence for our own theory.**
-
-> "I didn't learn this in school. I discovered it by building until the pattern revealed itself. If you were also told you were 'simple,' this is for you. **Complexity emerges from simplicity.**"
->
-> — James, Founder
-
----
-
-### The Discovery Process
-
-Forge Theory was not designed; it was discovered. It emerged organically from building 26 simulations over 8 years, revealing a universal pattern common to all complex systems. The story of its creation is itself a case study in emergence.
-
-**[➡️ Read the full story of the discovery process here](./DISCOVERY.md)**
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -397,26 +371,6 @@ This is the ultimate antidote to overthinking.
 
 ---
 
-### 🔬 For Methodological Innovation
-
-**We're pioneering human-AI collaborative research.**
-
-```
-Traditional research:
-  Human does everything
-  → Claims sole authorship
-  → Hides the messiness
-
-Our approach:
-  Human + AI collaboration
-  → Acknowledges both contributions
-  → Makes the process transparent
-
-Future research will be built on this model. We're ahead of the curve.
-```
-
----
-
 ### 📚 For Education
 
 **Learn fundamental principles across disciplines.**
@@ -562,7 +516,7 @@ Both are true. Examples:
 
 ### 🧠 The MAVRIC Decoder
 
-MAVRIC reveals the hidden structure of emergence in any system:
+MAVRIC is the analytical tool that reveals the hidden structure of emergence in any system. It is the core framework of Forge Theory.
 
 ```
 ┌─────────────────────────────────────────┐
